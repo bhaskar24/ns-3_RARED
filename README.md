@@ -1,12 +1,14 @@
 # Extending RED qdisc in ns­3 to support Refined Adaptive RED (RARED) algorithm
 Course Code: CS822
 
-Assignment: #GP3
+Assignment: #GP6
 
-Self-Configuring RED (SCRED) [1] is an extension of RED [2]. It inherits all the properities of RED, except static parameters. Self configuring RED makes RED parameters adaptive to handle wide variety of traffic.
+Refined Adaptive RED (RARED) [1] is an extension of ARED [2]. It inherits all the properities of ARED with minor improvement in adaptive setting of Pmax. This repository contains an implementation of RARED in ns-3 [3].
 
 References:
 
-[1] Feng, W. C., Kandlur, D. D., Saha, D., & Shin, K. G. (1999, March). A self-configuring RED gateway. In INFOCOM'99. Eighteenth Annual Joint Conference of the IEEE Computer and Communications Societies. Proceedings. IEEE (Vol. 3, pp. 1320-1328). IEEE.
+[1] Tae-hoon Kim, Kee-hyun Lee, "Refined Adaptive RED in TCP/IP Networks", SICE-ICASE, 2006. International Joint Conference, 2006
 
-[2] Floyd, S., & Jacobson, V. (1993). Random early detection gateways for congestion avoidance. IEEE/ACM Transactions on networking, 1(4), 397-413.
+[2] S. Floyd, R. Gummadi, and S. Shenker, "Adaptive RED: An Algorithm for Increasing the Robustness of RED's Active Queue Management,", http://www.icir.org/floyd/papers/adaptiveRed.pdf.
+
+[3] http://www.nsnam.org/
