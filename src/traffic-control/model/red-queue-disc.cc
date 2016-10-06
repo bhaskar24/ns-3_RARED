@@ -108,6 +108,11 @@ TypeId RedQueueDisc::GetTypeId (void)
                    BooleanValue (false),
                    MakeBooleanAccessor (&RedQueueDisc::m_isARED),
                    MakeBooleanChecker ())
+    .AddAttribute ("RARED",
+                   "True to enable RARED",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&RedQueueDisc::m_isRARED),
+                   MakeBooleanChecker ())
     .AddAttribute ("AdaptMaxP",
                    "True to adapt m_curMaxP",
                    BooleanValue (false),
@@ -433,6 +438,12 @@ RedQueueDisc::InitializeParams (void)
   m_cautious = 0;
   m_ptc = m_linkBandwidth.GetBitRate () / (8.0 * m_meanPktSize);
 
+  if (m_isRARED)
+  {
+      // As overall guidelines for RARED as implemented here are same as for ARED therefore we enable boolean value of ARED is True
+      m_isARED=true;
+  }
+
   if (m_isARED)
     {
       // Set m_minTh, m_maxTh and m_qW to zero for automatic setting
@@ -549,22 +560,38 @@ RedQueueDisc::InitializeParams (void)
 void
 RedQueueDisc::UpdateMaxP (double newAve, Time now)
 {
-  double m_part = 0.4 * (m_maxTh - m_minTh);
+  double m_part;
+  double alpha,beta;
+  double target;
+  // Conditions to check if RARED is enable or not if not then it switch its working to ARED
+  if (!m_isRARED)
+  {
+      m_part = 0.4 * (m_maxTh - m_minTh);
+      beta = m_beta; //For beta
+      alpha = m_alpha; //For alpha
+      if (alpha > 0.25 * m_curMaxP)
+      {
+       alpha = 0.25 * m_curMaxP;
+      }
+  }
+  else
+  {
+      m_part = 0.48 * (m_maxTh - m_minTh);
+      target = m_minTh + m_part;
+      beta = 1 - (0.17 * ((target-newAve)/(target-m_minTh))); //For beta
+      target = m_maxTh - m_part;
+      alpha = 0.25 * ((newAve - target) / target) * m_curMaxP ; // For alpha
+  }  
   // AIMD rule to keep target Q~1/2(m_minTh + m_maxTh)
   if (newAve < m_minTh + m_part && m_curMaxP > m_bottom)
     {
       // we should increase the average queue size, so decrease m_curMaxP
-      m_curMaxP = m_curMaxP * m_beta;
+      m_curMaxP = m_curMaxP * beta;
       m_lastSet = now;
     }
   else if (newAve > m_maxTh - m_part && m_top > m_curMaxP)
     {
       // we should decrease the average queue size, so increase m_curMaxP
-      double alpha = m_alpha;
-      if (alpha > 0.25 * m_curMaxP)
-        {
-          alpha = 0.25 * m_curMaxP;
-        }
       m_curMaxP = m_curMaxP + alpha;
       m_lastSet = now;
     }
