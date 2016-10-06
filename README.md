@@ -1,8 +1,7 @@
 # Extending RED qdisc in ns­3 to support Refined Adaptive RED (RARED) algorithm
+Course Code: CS822
 
-##Course Code: CS822
-
-### Assignment: #GP6
+Assignment: #GP6
 
 Refined Adaptive RED (RARED) [1] is an extension of ARED [2]. It inherits all the properities of ARED but with a minor improvement in adaptive setting of Pmax. This repository contains an implementation of RARED in ns-3 [3].
 
