@@ -282,6 +282,7 @@ private:
   bool m_isWait;            //!< True for waiting between dropped packets
   bool m_isGentle;          //!< True to increases dropping prob. slowly when ave queue exceeds maxthresh
   bool m_isARED;            //!< True to enable Adaptive RED
+  bool m_isRARED;           //!< True to enable Refined Adaptive RED
   bool m_isAdaptMaxP;       //!< True to adapt m_curMaxP
   double m_minTh;           //!< Min avg length threshold (bytes)
   double m_maxTh;           //!< Max avg length threshold (bytes), should be >= 2*minTh
