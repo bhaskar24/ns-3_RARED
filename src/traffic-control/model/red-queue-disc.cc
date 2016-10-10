@@ -110,14 +110,20 @@ TypeId RedQueueDisc::GetTypeId (void)
                    MakeBooleanChecker ())
     .AddAttribute ("RARED",
                    "True to enable RARED",
-                   BooleanValue (false),
-                   MakeBooleanAccessor (&RedQueueDisc::m_isRARED),
+                    BooleanValue (false),
+                    MakeBooleanAccessor (&RedQueueDisc::m_isRARED),
                    MakeBooleanChecker ())
     .AddAttribute ("AdaptMaxP",
                    "True to adapt m_curMaxP",
                    BooleanValue (false),
                    MakeBooleanAccessor (&RedQueueDisc::m_isAdaptMaxP),
                    MakeBooleanChecker ())
+    .AddAttribute ("AdaptMaxP",
+                   "True to adapt m_curMaxP",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&RedQueueDisc::m_isRAdaptMaxP),
+                   MakeBooleanChecker ())
+
     .AddAttribute ("MinTh",
                    "Minimum average length threshold in packets/bytes",
                    DoubleValue (5),
@@ -438,12 +444,6 @@ RedQueueDisc::InitializeParams (void)
   m_cautious = 0;
   m_ptc = m_linkBandwidth.GetBitRate () / (8.0 * m_meanPktSize);
 
-  if (m_isRARED)
-  {
-      // As overall guidelines for RARED as implemented here are same as for ARED therefore we enable boolean value of ARED is True
-      m_isARED=true;
-  }
-
   if (m_isARED)
     {
       // Set m_minTh, m_maxTh and m_qW to zero for automatic setting
@@ -453,6 +453,17 @@ RedQueueDisc::InitializeParams (void)
 
       // Turn on m_isAdaptMaxP to adapt m_curMaxP
       m_isAdaptMaxP = true;
+    }
+
+  if (m_isRARED)
+    {
+      // Set m_minTh, m_maxTh and m_qW to zero for automatic setting
+      m_minTh = 0;
+      m_maxTh = 0;
+      m_qW = 0;
+
+      // Turn on m_isRAdaptMaxP to adapt m_curMaxP as defined by RARED
+      m_isRAdaptMaxP = true;
     }
 
   if (m_minTh == 0 && m_maxTh == 0)
@@ -560,38 +571,44 @@ RedQueueDisc::InitializeParams (void)
 void
 RedQueueDisc::UpdateMaxP (double newAve, Time now)
 {
-  double m_part;
-  double alpha,beta;
-  double target;
-  // Conditions to check if RARED is enable or not if not then it switch its working to ARED
-  if (!m_isRARED)
-  {
-      m_part = 0.4 * (m_maxTh - m_minTh);
-      beta = m_beta; //For beta
-      alpha = m_alpha; //For alpha
-      if (alpha > 0.25 * m_curMaxP)
-      {
-       alpha = 0.25 * m_curMaxP;
-      }
-  }
-  else
-  {
-      m_part = 0.48 * (m_maxTh - m_minTh);
-      target = m_minTh + m_part;
-      beta = 1 - (0.17 * ((target-newAve)/(target-m_minTh))); //For beta
-      target = m_maxTh - m_part;
-      alpha = 0.25 * ((newAve - target) / target) * m_curMaxP ; // For alpha
-  }  
+  double m_part = 0.4 * (m_maxTh - m_minTh);
   // AIMD rule to keep target Q~1/2(m_minTh + m_maxTh)
   if (newAve < m_minTh + m_part && m_curMaxP > m_bottom)
     {
       // we should increase the average queue size, so decrease m_curMaxP
-      m_curMaxP = m_curMaxP * beta;
+      m_curMaxP = m_curMaxP * m_beta;
       m_lastSet = now;
     }
   else if (newAve > m_maxTh - m_part && m_top > m_curMaxP)
     {
       // we should decrease the average queue size, so increase m_curMaxP
+      double alpha = m_alpha;
+      if (alpha > 0.25 * m_curMaxP)
+        {
+          alpha = 0.25 * m_curMaxP;
+        }
+      m_curMaxP = m_curMaxP + alpha;
+      m_lastSet = now;
+    }
+}
+// Update m_curMaxP to keep the average queue length within the target range.
+void
+RedQueueDisc::UpdateMaxPRefined (double newAve, Time now)
+{
+  double m_part = 0.48 * (m_maxTh - m_minTh);
+  // AIMD rule to keep target Q~1/2(m_minTh + m_maxTh)
+  if (newAve < m_minTh + m_part && m_curMaxP > m_bottom)
+    {
+      // we should increase the average queue size, so decrease m_curMaxP
+      m_beta= 1 - (0.17 * (((m_minTh + m_part)-newAve)/((m_minTh + m_part)-m_minTh)));
+      m_curMaxP = m_curMaxP * m_beta;
+      m_lastSet = now;
+    }
+  else if (newAve > m_maxTh - m_part && m_top > m_curMaxP)
+    {
+      // we should decrease the average queue size, so increase m_curMaxP
+      double alpha = m_alpha;
+      alpha=0.25 * ((newAve - (m_maxTh - m_part)) / (m_maxTh - m_part)) * m_curMaxP;
       m_curMaxP = m_curMaxP + alpha;
       m_lastSet = now;
     }
@@ -607,11 +624,14 @@ RedQueueDisc::Estimator (uint32_t nQueued, uint32_t m, double qAvg, double qW)
   newAve += qW * nQueued;
 
   Time now = Simulator::Now();
+  if(m_isRAdaptMaxP && now > m_lastSet + m_interval)
+    {
+      UpdateMaxP(newAve, now);
+    }
   if (m_isAdaptMaxP && now > m_lastSet + m_interval)
     {
       UpdateMaxP(newAve, now);
     }
-
   return newAve;
 }
 
