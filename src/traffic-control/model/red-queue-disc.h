@@ -291,7 +291,6 @@ private:
   bool m_isARED;            //!< True to enable Adaptive RED
   bool m_isRARED;           //!< True to enable Refined Adaptive RED
   bool m_isAdaptMaxP;       //!< True to adapt m_curMaxP
-  bool m_isRAdaptMaxP;       //!< True to adapt m_curMaxP defined by RARED
   double m_minTh;           //!< Min avg length threshold (bytes)
   double m_maxTh;           //!< Max avg length threshold (bytes), should be >= 2*minTh
   uint32_t m_queueLimit;    //!< Queue limit in bytes / packets
