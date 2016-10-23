@@ -86,7 +86,7 @@ In addition to RED attributes, ARED queue requires following attributes:
 * Beta (decrement parameter for m_curMaxP)
 * RTT
 
-In addition to RED and ARED attributes, RARED queue requires following attributes:
+In addition to RED and ARED attributes, RARED queue requires following attribute:
 
 * RARED (Boolean attribute. Default: false)
 
@@ -124,16 +124,6 @@ To configure (ii); AdaptMaxP must be set to true, as done in
 
   Config::SetDefault ("ns3::RedQueueDisc::AdaptMaxP", BooleanValue (true));
 
-Examples
-========
-
-The RED queue example is found at ``src/traffic-control/examples/red-tests.cc``.
-
-ARED queue examples can be found at:
-``src/traffic-control/examples/adaptive-red-tests.cc`` and 
-``src/traffic-control/examples/red-vs-ared.cc``
-
-
 Simulating RARED
 ===============
 
@@ -153,7 +143,7 @@ ARED queue examples can be found at:
 ``src/traffic-control/examples/adaptive-red-tests.cc`` and 
 ``src/traffic-control/examples/red-vs-ared.cc``
 
-RARED queue examples can be found at:
+RARED queue example can be found at:
 ``src/traffic-control/examples/red-vs-rared.cc``
 
 Validation
