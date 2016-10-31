@@ -254,7 +254,7 @@ AutoRedQueueDiscTestCase::DoRun (void)
 }
 
 
-// Tests to verify the working of *adaptive* parameter in ARED
+// Tests to verify the working of *adaptive* parameter in ARED and RARED
 class AdaptiveRedQueueDiscTestCase : public TestCase
 {
 public:
@@ -266,7 +266,7 @@ private:
 };
 
 AdaptiveRedQueueDiscTestCase::AdaptiveRedQueueDiscTestCase ()
-  : TestCase ("Sanity check on adaptive parameter of ARED")
+  : TestCase ("Sanity check on adaptive parameter of ARED and RARED")
 {
 }
 
@@ -508,7 +508,6 @@ AdaptiveRedQueueDiscTestCase::RunAdaptiveRedDiscTest (StringValue mode)
   uint32_t    qSize = 25 * modeSize;
 
   Config::SetDefault ("ns3::RedQueueDisc::ARED", BooleanValue (true));
-  //Config::SetDefault ("ns3::RedQueueDisc::RARED", BooleanValue (true));
   Config::SetDefault ("ns3::RedQueueDisc::LInterm", DoubleValue (10.0));
   Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (qSize));
   Config::SetDefault ("ns3::RedQueueDisc::MeanPktSize", UintegerValue (meanPktSize + ipHeader.GetSerializedSize ()));
@@ -647,7 +646,6 @@ public:
     : TestSuite ("adaptive-red-queue-disc", UNIT)
   {
     AddTestCase (new AutoRedQueueDiscTestCase (), TestCase::QUICK);         // Tests for automatically set parameters of ARED
-    AddTestCase (new AdaptiveRedQueueDiscTestCase (), TestCase::QUICK);     // Tests for adaptive parameter of ARED
-    //AddTestCase (new RefinedAdaptiveRedQueueDiscTestCase (), TestCase::QUICK);     // Tests for adaptive parameter of RARED
+    AddTestCase (new AdaptiveRedQueueDiscTestCase (), TestCase::QUICK);     // Tests for adaptive parameter of ARED and RARED
   }
 } g_aredQueueDiscTestSuite;
