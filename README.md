@@ -3,7 +3,7 @@
 ## Assignment: #GP6	<br/>
 
 ### Overview		<br/>
-Refined Adaptive RED (RARED) [1] is an extension of ARED [2]. It inherits all the properities of ARED but with a minor improvement in adaptive setting of Pmax. This repository contains an implementation of RARED in ns-3 [3].
+Refined Adaptive RED (RARED) [1] is an extension of ARED [2]. It inherits all the properties of ARED but with a minor improvement in adaptive setting of Pmax. This repository contains an implementation of RARED in ns-3 [3].
 
 ### Simulating RARED	<br/>
 
